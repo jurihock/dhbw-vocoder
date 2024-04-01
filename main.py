@@ -46,8 +46,8 @@ if __name__ == '__main__':
 
     # Load source file as `x`:
 
-    x, samplerate = soundfile.read(src)
-    x = np.atleast_2d(x)
+    x, samplerate = soundfile.read(src, always_2d=True)
+    x = np.atleast_2d(x).transpose()
 
     # Setup and customize the phase vocoder:
 
@@ -55,7 +55,7 @@ if __name__ == '__main__':
 
     # Uncomment one of the following procedures:
 
-    y = tsm(x, vocoder)  # time-scale modification
+    # y = tsm(x, vocoder)  # time-scale modification
     # y = psm(x, vocoder)  # pitch-shifting modification
     # y = ptm(x, vocoder)  # pitch-shifting and time-scale modification
 
@@ -65,4 +65,4 @@ if __name__ == '__main__':
 
     # This feature requires sox.sourceforge.net
     # to be included in the PATH:
-    run(['pla', dst], check=False)
+    run(['play', dst], check=False)
