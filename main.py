@@ -46,8 +46,8 @@ if __name__ == '__main__':
 
     # Load source file as `x`:
 
+    print(f'Reading {src.resolve()}')
     x, samplerate = soundfile.read(src, always_2d=True)
-    x = np.atleast_2d(x).transpose()
 
     # Setup and customize the phase vocoder:
 
@@ -55,12 +55,13 @@ if __name__ == '__main__':
 
     # Uncomment one of the following procedures:
 
-    # y = tsm(x, vocoder)  # time-scale modification
-    # y = psm(x, vocoder)  # pitch-shifting modification
-    # y = ptm(x, vocoder)  # pitch-shifting and time-scale modification
+    # y = tsm(x.T, vocoder).T  # time-scale modification
+    # y = psm(x.T, vocoder).T  # pitch-shifting modification
+    # y = ptm(x.T, vocoder).T  # pitch-shifting and time-scale modification
 
     # Write `y` to destination file:
 
+    print(f'Writing {dst.resolve()}')
     soundfile.write(dst, np.squeeze(y), samplerate)
 
     # This feature requires sox.sourceforge.net
