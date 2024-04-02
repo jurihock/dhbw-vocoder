@@ -2,6 +2,7 @@ from typing import Union
 from numpy.typing import ArrayLike, NDArray
 
 import numpy as np
+import warnings
 
 from numpy.lib.stride_tricks import sliding_window_view
 
@@ -28,11 +29,28 @@ class STFT:
             Enable circular shift of segments.
         """
 
+        def is_power_of_two(n: int) -> bool:
+            return (n != 0) and (n & (n-1) == 0)
+
+        if not is_power_of_two(framesize):
+            warnings.warn('The frame size should be a power of two for optimal performance!', UserWarning)
+
+        if not is_power_of_two(framesize + padsize):
+            warnings.warn('The sum of frame and pad sizes should be a power of two for optimal performance!', UserWarning)
+
         self.framesize = framesize
         self.hopsize   = hopsize or (self.framesize // 4)
         self.padsize   = padsize
         self.shift     = shift
         self.window    = np.hanning(self.framesize + 1)[:-1]
+
+    def freqs(self, samplerate: Union[int, None] = None) -> NDArray:
+        """
+        Returns an array of DFT bin center frequency values in hertz.
+        If no sample rate is specified, then the frequency unit is cycles/second.
+        """
+
+        return np.fft.rfftfreq(self.framesize + self.padsize, 1 / (samplerate or 1))
 
     def stft(self, samples: ArrayLike) -> NDArray:
         """
