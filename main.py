@@ -52,10 +52,11 @@ if __name__ == '__main__':
 
     # Setup and customize the phase vocoder:
 
-    vocoder = Vocoder(samplerate, order=10, overlap=16)
+    vocoder = Vocoder(samplerate, order=10, overlap=16, dense=1)
 
     # Uncomment one of the following procedures:
 
+    y = x
     # y = tsm(x, vocoder)  # time-scale modification
     # y = psm(x, vocoder)  # pitch-shifting modification
     # y = ptm(x, vocoder)  # pitch-shifting and time-scale modification
@@ -67,4 +68,4 @@ if __name__ == '__main__':
 
     # This feature requires sox.sourceforge.net
     # to be included in the PATH:
-    # run(['play', dst], check=False)
+    run(['play', dst], check=False)
