@@ -124,7 +124,7 @@ class STFT:
 
         if self.shift:
 
-            data = np.fft.fftshift(data, axes=-1)
+            data = np.roll(data, self.framesize // -2, axis=-1)
 
         return np.fft.rfft(data, axis=-1, norm='forward')
 
@@ -139,7 +139,7 @@ class STFT:
 
         if self.shift:
 
-            data = np.fft.ifftshift(data, axes=-1)
+            data = np.roll(data, self.framesize // +2, axis=-1)
 
         if self.padsize:
 
