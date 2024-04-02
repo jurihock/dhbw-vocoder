@@ -125,7 +125,7 @@ class STFT:
 
         if self.padsize:
 
-            data = data[..., self.framesize]
+            data = data[..., :self.framesize]
 
         data *= self.window
 
