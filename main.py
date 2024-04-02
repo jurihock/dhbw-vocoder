@@ -40,6 +40,8 @@ def ptm(x: NDArray, vocoder: Vocoder) -> NDArray:
 
 if __name__ == '__main__':
 
+    # Specify input and output file paths:
+
     cwd = Path().cwd()
     src = cwd / 'x.wav'
     dst = cwd / 'y.wav'
@@ -68,4 +70,4 @@ if __name__ == '__main__':
 
     # This feature requires sox.sourceforge.net
     # to be included in the PATH:
-    run(['play', dst], check=False)
+    # run(['play', dst])
