@@ -29,6 +29,10 @@ class STFT:
             Enable circular shift of segments.
         """
 
+        assert framesize > 0
+        assert hopsize > 0
+        assert padsize >= 0
+
         def is_power_of_two(n: int) -> bool:
             return (n != 0) and (n & (n-1) == 0)
 

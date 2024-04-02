@@ -10,7 +10,7 @@ from stft import STFT
 
 class Vocoder:
     """
-    Collection of phase vocoder based signal modifications.
+    Collection of phase vocoder based routines for time-scale and pitch-shifting modifications.
     """
 
     def __init__(self, samplerate: int, *, order: int = 10, overlap: int = 16, dense: int = 1):
@@ -19,6 +19,11 @@ class Vocoder:
         FFT vector size `1 << order`, and STFT hop size `(2 << order) // overlap`.
         Parameter `dense` increases the FFT bin density by zero-padding in the time domain.
         """
+
+        assert samplerate > 0
+        assert order > 0
+        assert overlap > 0
+        assert dense > 0
 
         self.samplerate = samplerate
         self.framesize  = 2 << order
