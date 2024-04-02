@@ -1,5 +1,4 @@
 matplotlib
 numpy
 resampy
-sdft
 soundfile

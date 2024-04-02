@@ -5,8 +5,10 @@ import resampy
 
 
 def resample(x: ArrayLike, q: int) -> NDArray:
-    '''Interpolates the 1D array `x` according to the scaling factor `q`
-       by using the band-limited sinc interpolation method.'''
+    """
+    Interpolates the 1D array `x` according to the scaling factor `q`
+    by using the band-limited sinc interpolation method.
+    """
 
     assert q > 0
 

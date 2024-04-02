@@ -4,8 +4,10 @@ import numpy as np
 
 
 def interpolate(x: ArrayLike, q: float) -> NDArray:
-    '''Interpolates the ND array `x` according to the scaling factor `q`
-       by using the linear interpolation method.'''
+    """
+    Interpolates the ND array `x` according to the scaling factor `q`
+    by using the linear interpolation method.
+    """
 
     assert q > 0
 

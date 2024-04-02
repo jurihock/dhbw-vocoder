@@ -5,27 +5,30 @@ import numpy as np
 from princarg import princarg
 from interpolation import interpolate
 from resampling import resample
-from sdft import STFT
+from stft import STFT
 
 
 class Vocoder:
+    """
+    Collection of phase vocoder based signal modifications.
+    """
 
     def __init__(self, samplerate: int, *, order: int = 10, overlap: int = 16):
-        '''
+        """
         Creates a new phase vocoder instance for the specified `samplerate` in Hz,
         FFT vector size `1 << order`, and STFT hop size `(2 << order) // overlap`.
-        '''
+        """
 
         self.samplerate = samplerate
         self.framesize = 2 << order
         self.hopsize = self.framesize // overlap
 
     def tsm(self, x: ArrayLike, *, timefactor: float = 1, shiftpitch: bool = False) -> NDArray:
-        '''
+        """
         Performs time-scale modification (TSM) to `x` according to the specified
         time-scaling factor `timefactor` and optional pitch-shifting `shiftpitch`
         by resampling the time-scaling result.
-        '''
+        """
 
         samplerate = self.samplerate
         framesize  = self.framesize
@@ -34,8 +37,8 @@ class Vocoder:
         hopsizeA = hopsize
         hopsizeS = int(hopsizeA * timefactor)
 
-        stft  = STFT(framesize, hopsizeA, shift=True)
-        istft = STFT(framesize, hopsizeS, shift=True)
+        stft  = STFT(framesize, hopsize=hopsizeA, shift=True)
+        istft = STFT(framesize, hopsize=hopsizeS, shift=True)
 
         # load and analyze the input file 'x'
 
@@ -55,7 +58,7 @@ class Vocoder:
         # perform time scaling
 
         εA = princarg(ΔφA - ω * ΔtA)
-        εS = εA * timefactor # = εA * (ΔtS / ΔtA)
+        εS = εA * timefactor  # = εA * (ΔtS / ΔtA)
 
         # postprocess phase values
 
@@ -74,16 +77,16 @@ class Vocoder:
         return y
 
     def psm(self, x: ArrayLike, *, pitchfactor: float = 1) -> NDArray:
-        '''
+        """
         Performs pitch-shifting modification (PSM) to `x` according
         to the specified pitch-shifting factor `pitchfactor`.
-        '''
+        """
 
         samplerate = self.samplerate
         framesize  = self.framesize
         hopsize    = self.hopsize
 
-        stft = STFT(framesize, hopsize)
+        stft = STFT(framesize, hopsize=hopsize)
 
         # load and analyze the input file 'x'
 
@@ -102,14 +105,14 @@ class Vocoder:
 
         εA = princarg(ΔφA - ω * Δt)
 
-        λA = εA / Δt + ω # = (εA + ω * Δt) / Δt
+        λA = εA / Δt + ω  # = (εA + ω * Δt) / Δt
         λS = interpolate(λA, pitchfactor) * pitchfactor
 
-        εS = λS * Δt # = λS * Δt - ω * Δt
+        εS = λS * Δt  # = λS * Δt - ω * Δt
 
         # postprocess phase values
 
-        ΔφS = εS # = εS + ω * Δt
+        ΔφS = εS  # = εS + ω * Δt
         φS  = np.cumsum(ΔφS, axis=0) * (2 * np.pi)
 
         # manipulate magnitudes
@@ -127,11 +130,11 @@ class Vocoder:
         return y
 
     def ptm(self, x: ArrayLike, *, pitchfactor: float = 1, timefactor: float = 1) -> NDArray:
-        '''
+        """
         Performs combined pitch-shifting and time-scale modification (PTM)
         to `x` according to the specified pitch-shifting factor `pitchfactor`
         and time-scaling factor `timefactor` as well.
-        '''
+        """
 
         samplerate = self.samplerate
         framesize  = self.framesize
@@ -140,8 +143,8 @@ class Vocoder:
         hopsizeA = hopsize
         hopsizeS = int(hopsizeA * timefactor)
 
-        stft  = STFT(framesize, hopsizeA, shift=True)
-        istft = STFT(framesize, hopsizeS, shift=True)
+        stft  = STFT(framesize, hopsize=hopsizeA, shift=True)
+        istft = STFT(framesize, hopsize=hopsizeS, shift=True)
 
         # load and analyze the input file 'x'
 
@@ -162,14 +165,14 @@ class Vocoder:
 
         εA = princarg(ΔφA - ω * ΔtA)
 
-        λA = εA / ΔtA + ω # = (εA + ω * ΔtA) / ΔtA
+        λA = εA / ΔtA + ω  # = (εA + ω * ΔtA) / ΔtA
         λS = interpolate(λA, pitchfactor) * pitchfactor
 
-        εS = λS * ΔtS # = λS * ΔtS - ω * ΔtS
+        εS = λS * ΔtS  # = λS * ΔtS - ω * ΔtS
 
         # postprocess phase values
 
-        ΔφS = εS # = εS + ω * ΔtS
+        ΔφS = εS  # = εS + ω * ΔtS
         φS  = np.cumsum(ΔφS, axis=0) * (2 * np.pi)
 
         # manipulate magnitudes
