@@ -6,6 +6,7 @@ from princarg import princarg
 from interpolation import interpolate
 from resampling import resample
 from stft import STFT
+from fafe import FAFE
 
 
 class Vocoder:
@@ -176,6 +177,77 @@ class Vocoder:
         εA = princarg(ΔφA - ω * ΔtA)
 
         λA = εA / ΔtA + ω  # = (εA + ω * ΔtA) / ΔtA
+        λS = interpolate(λA, pitchfactor) * pitchfactor
+
+        εS = λS * ΔtS  # = λS * ΔtS - ω * ΔtS
+
+        # postprocess phase values
+
+        ΔφS = εS  # = εS + ω * ΔtS
+        φS  = np.cumsum(ΔφS, axis=0) * (2 * np.pi)
+
+        # manipulate magnitudes
+
+        rA = np.abs(X)
+        rS = interpolate(rA, pitchfactor)
+
+        rS[(λS <= 0) | (λS >= samplerate / 2)] = 0
+
+        # synthesize and save the output file 'y'
+
+        Y = rS * np.exp(1j * φS)
+        y = istft.istft(Y)
+
+        return y
+
+    def experimental(self, x: ArrayLike, *, pitchfactor: float = 1, timefactor: float = 1, phase_vs_magnitude: float = 1) -> NDArray:
+        """
+        Performs combined pitch-shifting and time-scale modification (PTM)
+        to `x` according to the specified pitch-shifting factor `pitchfactor`
+        and time-scaling factor `timefactor` as well.
+
+        Use `phase_vs_magnitude` parameter to balance between the phase based `-1`
+        and the magnitude based `+1` instantaneous frequency estimate.
+        """
+
+        samplerate = self.samplerate
+        framesize  = self.framesize
+        hopsize    = self.hopsize
+        padsize    = self.padsize
+
+        hopsizeA = hopsize
+        hopsizeS = int(hopsizeA * timefactor)
+
+        stft  = STFT(framesize, hopsize=hopsizeA, padsize=padsize, shift=True)
+        istft = STFT(framesize, hopsize=hopsizeS, padsize=padsize, shift=True)
+
+        fafe = FAFE(samplerate, mode='p')
+
+        # load and analyze the input file 'x'
+
+        x = np.atleast_1d(x)
+        X = stft.stft(x)
+
+        ω  = stft.freqs() * samplerate
+
+        ΔtA = hopsizeA / samplerate
+        ΔtS = hopsizeS / samplerate
+
+        # preprocess phase values
+
+        φA  = np.angle(X) / (2 * np.pi)
+        ΔφA = np.diff(φA, axis=0, prepend=0)
+
+        # manipulate instantaneous frequencies
+
+        εA = princarg(ΔφA - ω * ΔtA)
+
+        λA0 = εA / ΔtA + ω  # = (εA + ω * ΔtA) / ΔtA
+        λA1 = fafe(X)
+
+        β = np.clip(phase_vs_magnitude / np.array([-2, +2]) + 0.5, 0, 1)
+
+        λA = λA0 * β[0] + λA1 * β[1]
         λS = interpolate(λA, pitchfactor) * pitchfactor
 
         εS = λS * ΔtS  # = λS * ΔtS - ω * ΔtS
