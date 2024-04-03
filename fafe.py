@@ -20,11 +20,24 @@ class FAFE:
     '''
 
     def __init__(self, samplerate: int, mode: Union[str, None]) -> NDArray:
+        """
+        Creates an instantaneous frequency estimator according
+        to the specified `samplerate` in hertz and the algorithm name:
+          - jacobsen (rect window)
+          - quinn    (rect window)
+          - macleod  (rect window, is not yet implemented)
+          - gradke   (hann window)
+          - hawkes   (hann window)
+          - lyons    (hann window)
+        """
 
         self.samplerate = samplerate
         self.mode = mode
 
     def __call__(self, dfts: ArrayLike) -> NDArray:
+        """
+        Estimates the instantaneous frequency values in hertz for the specified DFT matrix.
+        """
 
         dfts = np.atleast_2d(dfts)
         assert dfts.ndim == 2
