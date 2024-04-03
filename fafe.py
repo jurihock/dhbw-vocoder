@@ -76,10 +76,11 @@ class FAFE:
                 beta1 = +alpha1 / (1 - alpha1)
                 beta2 = -alpha2 / (1 - alpha2)
 
-                mask = (beta1 > 0) & (beta2 > 0)
+                mask2 = (beta1 > 0) & (beta2 > 0)
+                mask1 = ~mask2
 
-                drifts[mask]  = beta2[mask]
-                drifts[~mask] = beta1[~mask]
+                drifts[mask1] = beta1[mask1]
+                drifts[mask2] = beta2[mask2]
 
         elif str(self.mode).lower() == 'macleod':
 
@@ -105,11 +106,11 @@ class FAFE:
                 beta1 = (alpha1 - 2) / (alpha1 + 1)
                 beta2 = (2 * alpha2 - 1) / (alpha2 + 1)
 
-                mask = l > r
-                drifts[mask] = beta1[mask]
+                mask1 = l > r
+                mask2 = l < r
 
-                mask = l < r
-                drifts[mask] = beta2[mask]
+                drifts[mask1] = beta1[mask1]
+                drifts[mask2] = beta2[mask2]
 
         elif str(self.mode).lower() == 'hawkes':
 
