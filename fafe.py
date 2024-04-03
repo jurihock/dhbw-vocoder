@@ -93,10 +93,10 @@ class FAFE:
                 beta2 = (2 * alpha2 - 1) / (alpha2 + 1)
 
                 mask = l > r
-                drifts[mask] = beta1
+                drifts[mask] = beta1[mask]
 
                 mask = l < r
-                drifts[mask] = beta2
+                drifts[mask] = beta2[mask]
 
         elif str(self.mode).lower() == 'hawkes':
 
