@@ -19,7 +19,7 @@ class FAFE:
         https://ieeexplore.ieee.org/book/6241055
     '''
 
-    def __init__(self, samplerate: int, *, mode: Union[str, None] = None) -> NDArray:
+    def __init__(self, samplerate: int, mode: Union[str, None]) -> NDArray:
 
         self.samplerate = samplerate
         self.mode = mode

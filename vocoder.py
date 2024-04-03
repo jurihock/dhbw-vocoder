@@ -200,14 +200,14 @@ class Vocoder:
 
         return y
 
-    def experimental(self, x: ArrayLike, *, pitchfactor: float = 1, timefactor: float = 1, phase_vs_magnitude: float = 1) -> NDArray:
+    def experimental(self, x: ArrayLike, *, pitchfactor: float = 1, timefactor: float = 1, phase_vs_fafe: float = 1) -> NDArray:
         """
         Performs combined pitch-shifting and time-scale modification (PTM)
         to `x` according to the specified pitch-shifting factor `pitchfactor`
         and time-scaling factor `timefactor` as well.
 
-        Use `phase_vs_magnitude` parameter to balance between the phase based `-1`
-        and the magnitude based `+1` instantaneous frequency estimate.
+        Use `phase_vs_fafe` parameter to balance between the phase based `-1`
+        and the FAFE based `+1` instantaneous frequency estimate.
         """
 
         samplerate = self.samplerate
@@ -218,24 +218,26 @@ class Vocoder:
         hopsizeA = hopsize
         hopsizeS = int(hopsizeA * timefactor)
 
-        stft  = STFT(framesize, hopsize=hopsizeA, padsize=padsize, shift=True)
+        stft0 = STFT(framesize, hopsize=hopsizeA, padsize=padsize, shift=True)
+        stft1 = STFT(framesize, hopsize=hopsizeA, padsize=padsize, window=False)
         istft = STFT(framesize, hopsize=hopsizeS, padsize=padsize, shift=True)
 
-        fafe = FAFE(samplerate, mode='p')
+        fafe = FAFE(samplerate, 'quinn')
 
         # load and analyze the input file 'x'
 
         x = np.atleast_1d(x)
-        X = stft.stft(x)
+        X0 = stft0.stft(x)
+        X1 = stft1.stft(x)
 
-        ω  = stft.freqs() * samplerate
+        ω  = stft1.freqs() * samplerate
 
         ΔtA = hopsizeA / samplerate
         ΔtS = hopsizeS / samplerate
 
         # preprocess phase values
 
-        φA  = np.angle(X) / (2 * np.pi)
+        φA  = np.angle(X0) / (2 * np.pi)
         ΔφA = np.diff(φA, axis=0, prepend=0)
 
         # manipulate instantaneous frequencies
@@ -243,9 +245,9 @@ class Vocoder:
         εA = princarg(ΔφA - ω * ΔtA)
 
         λA0 = εA / ΔtA + ω  # = (εA + ω * ΔtA) / ΔtA
-        λA1 = fafe(X)
+        λA1 = fafe(X1)
 
-        β = np.clip(phase_vs_magnitude / np.array([-2, +2]) + 0.5, 0, 1)
+        β = np.clip(phase_vs_fafe / np.array([-2, +2]) + 0.5, 0, 1)
 
         λA = λA0 * β[0] + λA1 * β[1]
         λS = interpolate(λA, pitchfactor) * pitchfactor
@@ -259,7 +261,7 @@ class Vocoder:
 
         # manipulate magnitudes
 
-        rA = np.abs(X)
+        rA = np.abs(X0)
         rS = interpolate(rA, pitchfactor)
 
         rS[(λS <= 0) | (λS >= samplerate / 2)] = 0
