@@ -219,7 +219,7 @@ class Vocoder:
         hopsizeS = int(hopsizeA * timefactor)
 
         stft0 = STFT(framesize, hopsize=hopsizeA, padsize=padsize, shift=True)
-        stft1 = STFT(framesize, hopsize=hopsizeA, padsize=padsize, window=False)
+        stft1 = STFT(framesize, hopsize=hopsizeA, padsize=padsize, window=None)
         istft = STFT(framesize, hopsize=hopsizeS, padsize=padsize, shift=True)
 
         fafe = FAFE(samplerate, 'quinn')

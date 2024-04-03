@@ -45,11 +45,19 @@ class STFT:
         if not is_power_of_two(framesize + padsize):
             warnings.warn('The sum of frame and pad sizes should be a power of two for optimal performance!', UserWarning)
 
+        windows = {
+            'rect':  lambda n: np.ones(n),
+            'none':  lambda n: np.ones(n),
+            'false': lambda n: np.ones(n),
+            'true':  lambda n: np.hanning(n+1)[:-1],
+            'hann':  lambda n: np.hanning(n+1)[:-1],
+        }
+
         self.framesize = framesize
         self.hopsize   = hopsize or (self.framesize // 4)
         self.padsize   = padsize
         self.shift     = shift
-        self.window    = np.hanning(self.framesize + 1)[:-1] if bool(window) else np.ones(self.framesize)
+        self.window    = windows[str(window).lower()](self.framesize)
 
     def freqs(self, samplerate: Union[int, None] = None) -> NDArray:
         """
