@@ -46,8 +46,8 @@ class Vocoder:
         hopsizeA = hopsize
         hopsizeS = int(hopsizeA * timefactor)
 
-        stft  = STFT(framesize, hopsize=hopsizeA, padsize=padsize, shift=True)
-        istft = STFT(framesize, hopsize=hopsizeS, padsize=padsize, shift=True)
+        stft  = STFT(framesize, hopsize=hopsizeA, padsize=padsize, center=True)
+        istft = STFT(framesize, hopsize=hopsizeS, padsize=padsize, center=True)
 
         # load and analyze the input file 'x'
 
@@ -96,7 +96,7 @@ class Vocoder:
         hopsize    = self.hopsize
         padsize    = self.padsize
 
-        stft = STFT(framesize, hopsize=hopsize, padsize=padsize, shift=False)
+        stft = STFT(framesize, hopsize=hopsize, padsize=padsize, center=False)
 
         # load and analyze the input file 'x'
 
@@ -154,8 +154,8 @@ class Vocoder:
         hopsizeA = hopsize
         hopsizeS = int(hopsizeA * timefactor)
 
-        stft  = STFT(framesize, hopsize=hopsizeA, padsize=padsize, shift=True)
-        istft = STFT(framesize, hopsize=hopsizeS, padsize=padsize, shift=True)
+        stft  = STFT(framesize, hopsize=hopsizeA, padsize=padsize, center=True)
+        istft = STFT(framesize, hopsize=hopsizeS, padsize=padsize, center=True)
 
         # load and analyze the input file 'x'
 
@@ -218,9 +218,9 @@ class Vocoder:
         hopsizeA = hopsize
         hopsizeS = int(hopsizeA * timefactor)
 
-        stft0 = STFT(framesize, hopsize=hopsizeA, padsize=padsize, shift=True)
+        stft0 = STFT(framesize, hopsize=hopsizeA, padsize=padsize, center=True)
         stft1 = STFT(framesize, hopsize=hopsizeA, padsize=padsize, window=None)
-        istft = STFT(framesize, hopsize=hopsizeS, padsize=padsize, shift=True)
+        istft = STFT(framesize, hopsize=hopsizeS, padsize=padsize, center=True)
 
         fafe = FAFE(samplerate, 'quinn')
 

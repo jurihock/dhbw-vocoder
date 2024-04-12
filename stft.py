@@ -12,7 +12,7 @@ class STFT:
     Short-Time Fourier Transform (STFT).
     """
 
-    def __init__(self, framesize: int, *, hopsize: Union[int, None] = None, padsize: int = 0, shift: bool = False, window: Union[bool, str, None] = True):
+    def __init__(self, framesize: int, *, hopsize: Union[int, None] = None, padsize: int = 0, center: bool = False, window: Union[bool, str, None] = True):
         """
         Create a new STFT plan.
 
@@ -25,8 +25,8 @@ class STFT:
             Defaults to `framesize // 4`.
         padsize: int, optional
             Number of zeros to pad the segments with.
-        shift: bool, optional
-            Enable circular shift of segments.
+        center: bool, optional
+            Shift the zero-frequency to the center of the segment.
         window: bool, str, none, optional
             Window function name or a boolean, to enable the default hann window.
             Currently, only hann and rect window functions are supported.
@@ -56,7 +56,7 @@ class STFT:
         self.framesize = framesize
         self.hopsize   = hopsize or (self.framesize // 4)
         self.padsize   = padsize
-        self.shift     = shift
+        self.center     = center
         self.window    = windows[str(window).lower()](self.framesize)
 
     def freqs(self, samplerate: Union[int, None] = None) -> NDArray:
@@ -137,7 +137,7 @@ class STFT:
 
             data = np.pad(data, ((0, 0), (0, self.padsize)))
 
-        if self.shift:
+        if self.center:
 
             data = np.roll(data, self.framesize // -2, axis=-1)
 
@@ -152,7 +152,7 @@ class STFT:
 
         data = np.fft.irfft(data, axis=-1, norm='forward')
 
-        if self.shift:
+        if self.center:
 
             data = np.roll(data, self.framesize // +2, axis=-1)
 
