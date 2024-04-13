@@ -30,6 +30,20 @@ class Spectrum:
         self.hopsize    = self.framesize // overlap
         self.padsize    = (2 << (order + dense - 1)) - self.framesize
 
+    def freqs(self) -> NDArray:
+        """
+        Returns an array of DFT bin center frequency values in hertz.
+        """
+
+        samplerate = self.samplerate
+        framesize  = self.framesize
+        hopsize    = self.hopsize
+        padsize    = self.padsize
+
+        stft = STFT(framesize, hopsize=hopsize, padsize=padsize)
+
+        return stft.freqs(samplerate)
+
     def analyze(self, x: ArrayLike) -> NDArray:
         """
         Performs the STFT procedure on the specified time-domain array `x`.
