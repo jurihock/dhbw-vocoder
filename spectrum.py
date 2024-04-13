@@ -157,6 +157,11 @@ class Spectrum:
         quefrencies = np.arange(framesize) / samplerate / 1e-3
         timestamps  = np.arange(len(X)) * hopsize / samplerate
 
+        # for symmetry reasons, plot only the half of the real cepstrum.
+        assert quefrencies.size == cepstrum.shape[-1]
+        quefrencies = quefrencies[:quefrencies.size//2]
+        cepstrum    = cepstrum[..., :quefrencies.size]
+
         extent = (timestamps[0], timestamps[-1], quefrencies[0], quefrencies[-1])
         args   = dict(aspect='auto', cmap='binary', extent=extent, interpolation='nearest', origin='lower')
 
