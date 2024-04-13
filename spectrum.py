@@ -7,13 +7,14 @@ import numpy as np
 from stft import STFT
 
 
-class Spectrogram:
+class Spectrum:
 
     def __init__(self, samplerate: int, *, order: int = 10, overlap: int = 16, dense: int = 1):
 
         assert samplerate > 0
         assert order > 0
         assert overlap > 0
+        assert dense > 0
 
         self.samplerate = samplerate
         self.framesize  = 2 << order
@@ -27,12 +28,25 @@ class Spectrogram:
         padsize   = self.padsize
 
         stft = STFT(framesize, hopsize=hopsize, padsize=padsize)
-        
+
         y = stft.stft(x)
 
         return y
 
-    def spectrogram(self, x: ArrayLike,
+    def synthesize(self, x: ArrayLike) -> NDArray:
+
+        framesize = self.framesize
+        hopsize   = self.hopsize
+        padsize   = self.padsize
+
+        stft = STFT(framesize, hopsize=hopsize, padsize=padsize)
+        
+        y = stft.istft(x)
+
+        return y
+
+    def spectrogram(self, x: ArrayLike, *,
+                    name: str = 'Spectrogram',
                     xlim: Tuple[float, float] = (None, None),
                     ylim: Tuple[float, float] = (None, None),
                     clim: Tuple[float, float] = (-120, 0)):
@@ -65,7 +79,7 @@ class Spectrogram:
         extent = (timestamps[0], timestamps[-1], frequencies[0], frequencies[-1])
         args   = dict(aspect='auto', cmap='inferno', extent=extent, interpolation='nearest', origin='lower')
 
-        plot.figure('Spectrogram')
+        plot.figure(name)
         plot.imshow(spectrum.T, **args)
         colorbar = plot.colorbar()
 
@@ -79,7 +93,8 @@ class Spectrogram:
 
         return self
 
-    def cepstrogram(self, x: ArrayLike,
+    def cepstrogram(self, x: ArrayLike, *,
+                    name: str = 'Cepstrogram',
                     xlim: Tuple[float, float] = (None, None),
                     ylim: Tuple[float, float] = (None, None),
                     clim: Tuple[float, float] = (0, 0.1)):
@@ -114,7 +129,7 @@ class Spectrogram:
         extent = (timestamps[0], timestamps[-1], quefrencies[0], quefrencies[-1])
         args   = dict(aspect='auto', cmap='binary', extent=extent, interpolation='nearest', origin='lower')
 
-        plot.figure('Cepstrogram')
+        plot.figure(name)
         plot.imshow(cepstrum.T, **args)
         colorbar = plot.colorbar()
 
@@ -128,7 +143,8 @@ class Spectrogram:
 
         return self
 
-    def phasogram(self, x: ArrayLike,
+    def phasogram(self, x: ArrayLike, *,
+                  name: str = 'Phasogram',
                   xlim: Tuple[float, float] = (None, None),
                   ylim: Tuple[float, float] = (None, None),
                   clim: Tuple[float, float] = (-np.pi, +np.pi)):
@@ -158,7 +174,7 @@ class Spectrogram:
         extent = (timestamps[0], timestamps[-1], frequencies[0], frequencies[-1])
         args   = dict(aspect='auto', cmap='twilight', extent=extent, interpolation='nearest', origin='lower')
 
-        plot.figure('Phasogram')
+        plot.figure(name)
         plot.imshow(values.T, **args)
         colorbar = plot.colorbar()
 
