@@ -8,8 +8,17 @@ from stft import STFT
 
 
 class Spectrum:
+    """
+    Wrapper around the STFT processor providing `spectrogram`, `cepstrogram`, and `phasogram` plots
+    in addition to `analyze` (stft) and `synthesize` (istft) procedures.
+    """
 
     def __init__(self, samplerate: int, *, order: int = 10, overlap: int = 16, dense: int = 1):
+        """
+        Creates a new spectrum processor instance for the specified `samplerate` in hertz,
+        FFT vector size `1 << order`, and STFT hop size `(2 << order) // overlap`.
+        Parameter `dense` increases the FFT bin density by zero-padding in the time domain.
+        """
 
         assert samplerate > 0
         assert order > 0
@@ -22,6 +31,10 @@ class Spectrum:
         self.padsize    = (2 << (order + dense - 1)) - self.framesize
 
     def analyze(self, x: ArrayLike) -> NDArray:
+        """
+        Performs the STFT procedure on the specified time-domain array `x`.
+        Returns the frequency-domain DFT matrix `y`.
+        """
 
         framesize = self.framesize
         hopsize   = self.hopsize
@@ -34,6 +47,10 @@ class Spectrum:
         return y
 
     def synthesize(self, x: ArrayLike) -> NDArray:
+        """
+        Performs the ISTFT procedure on the specified frequency-domain DFT matrix `x`.
+        Returns the time-domain array `y`.
+        """
 
         framesize = self.framesize
         hopsize   = self.hopsize
@@ -50,6 +67,13 @@ class Spectrum:
                     xlim: Tuple[float, float] = (None, None),
                     ylim: Tuple[float, float] = (None, None),
                     clim: Tuple[float, float] = (-120, 0)):
+        """
+        Creates the spectrogram plot of `x`,
+        which can be a time-domain array
+        or a frequency-domain DFT matrix.
+        Call the `show` function in order
+        to display the created plot.
+        """
 
         if not np.any(np.iscomplex(x)):
 
@@ -98,6 +122,13 @@ class Spectrum:
                     xlim: Tuple[float, float] = (None, None),
                     ylim: Tuple[float, float] = (None, None),
                     clim: Tuple[float, float] = (0, 0.1)):
+        """
+        Creates the cepstrogram plot of `x`,
+        which can be a time-domain array
+        or a frequency-domain DFT matrix.
+        Call the `show` function in order
+        to display the created plot.
+        """
 
         if not np.any(np.iscomplex(x)):
 
@@ -148,6 +179,13 @@ class Spectrum:
                   xlim: Tuple[float, float] = (None, None),
                   ylim: Tuple[float, float] = (None, None),
                   clim: Tuple[float, float] = (-np.pi, +np.pi)):
+        """
+        Creates the phasogram plot of `x`,
+        which can be a time-domain array
+        or a frequency-domain DFT matrix.
+        Call the `show` function in order
+        to display the created plot.
+        """
 
         if not np.any(np.iscomplex(x)):
 
@@ -189,6 +227,10 @@ class Spectrum:
         return self
 
     def show(self):
+        """
+        Displays the plot previously created by the
+        `spectrogram`, `cepstrogram`, or `phasogram` functions.
+        """
 
         plot.tight_layout()
         plot.show()

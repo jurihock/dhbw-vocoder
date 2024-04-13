@@ -37,9 +37,10 @@ if __name__ == '__main__':
 
     Y = [envelope * phase, residual * phase]
 
-    spectrum.spectrogram(X, name='Origin')
-    spectrum.spectrogram(Y[0], name='Envelope')
-    spectrum.spectrogram(Y[1] / Y[1].shape[-1], name='Residual')
+    spectrum.cepstrogram(X, name='Origin cepstrogram')
+    spectrum.spectrogram(X, name='Origin spectrogram')
+    spectrum.spectrogram(Y[0], name='Envelope spectrogram')
+    spectrum.spectrogram(Y[1] / Y[1].shape[-1], name='Residual spectrogram')
     spectrum.show()
 
     # Synthesize output `y`:

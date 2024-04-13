@@ -5,7 +5,11 @@ import numpy as np
 
 class Cepstrum:
 
-    def __init__(self, samplerate: int) -> None:
+    def __init__(self, samplerate: int):
+        """
+        Creates a new cepstrum processor instance
+        for the specified `samplerate` in hertz.
+        """
 
         assert samplerate > 0
 
@@ -14,8 +18,8 @@ class Cepstrum:
     def lifter(self, x: ArrayLike, *, quefrency: float) -> NDArray:
         """
         Performs cepstral lowpass liftering on DFT matrix `x`
-        according to the specified cutoff `quefrency` in seconds and
-        returns the resulting spectral envelope of the same shape as `x`.
+        according to the specified cutoff `quefrency` in seconds.
+        Returns the resulting spectral envelope of the same shape as `x`.
         """
 
         x = np.atleast_2d(x)
