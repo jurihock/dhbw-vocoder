@@ -30,19 +30,14 @@ class Spectrum:
         self.hopsize    = self.framesize // overlap
         self.padsize    = (2 << (order + dense - 1)) - self.framesize
 
+        self.stft = STFT(self.framesize, hopsize=self.hopsize, padsize=self.padsize)
+
     def freqs(self) -> NDArray:
         """
         Returns an array of DFT bin center frequency values in hertz.
         """
 
-        samplerate = self.samplerate
-        framesize  = self.framesize
-        hopsize    = self.hopsize
-        padsize    = self.padsize
-
-        stft = STFT(framesize, hopsize=hopsize, padsize=padsize)
-
-        return stft.freqs(samplerate)
+        return self.stft.freqs(self.samplerate)
 
     def analyze(self, x: ArrayLike) -> NDArray:
         """
@@ -50,15 +45,7 @@ class Spectrum:
         Returns the frequency-domain DFT matrix `y`.
         """
 
-        framesize = self.framesize
-        hopsize   = self.hopsize
-        padsize   = self.padsize
-
-        stft = STFT(framesize, hopsize=hopsize, padsize=padsize)
-
-        y = stft.stft(x)
-
-        return y
+        return self.stft.stft(x)
 
     def synthesize(self, x: ArrayLike) -> NDArray:
         """
@@ -66,15 +53,7 @@ class Spectrum:
         Returns the time-domain array `y`.
         """
 
-        framesize = self.framesize
-        hopsize   = self.hopsize
-        padsize   = self.padsize
-
-        stft = STFT(framesize, hopsize=hopsize, padsize=padsize)
-        
-        y = stft.istft(x)
-
-        return y
+        return self.stft.istft(x)
 
     def spectrogram(self, x: ArrayLike, *,
                     name: str = 'Spectrogram',

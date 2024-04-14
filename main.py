@@ -2,6 +2,7 @@ from pathlib import Path
 from numpy.typing import NDArray
 
 from subprocess import run
+from hpss import HPSS
 from vocoder import Vocoder
 
 import numpy as np
@@ -51,6 +52,12 @@ if __name__ == '__main__':
     print(f'Reading {src.resolve()}')
     x, samplerate = soundfile.read(src, always_2d=True)
     x = x.T  # make it appear as (channels, samples)
+
+    # Preprocessing:
+
+    # optionally try HPSS to extract and bypass the transients
+    # hpss = HPSS(samplerate, order=10, overlap=16, dense=1)
+    # harm, perc, misc = hpss(x[0], 42)
 
     # Setup and customize the phase vocoder:
 
