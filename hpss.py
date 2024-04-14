@@ -5,6 +5,7 @@ import numpy as np
 
 from scipy.signal import medfilt2d
 from stft import STFT
+from settings import Settings
 
 
 class HPSS:
@@ -12,24 +13,21 @@ class HPSS:
     Harmonic Percussive Source Separation (HPSS).
     """
 
-    def __init__(self, samplerate: int, *, order: int = 10, overlap: int = 16, dense: int = 1):
+    def __init__(self, samplerate: int, settings: Union[Settings, None] = None):
         """
-        Creates a new HPSS processor instance for the specified `samplerate` in hertz,
-        FFT vector size `1 << order`, and STFT hop size `(2 << order) // overlap`.
-        Parameter `dense` increases the FFT bin density by zero-padding in the time domain.
+        Creates a new HPSS processor instance
+        for the specified `samplerate` in hertz
+        and customized STFT `settings`.
         """
 
         assert samplerate > 0
-        assert order > 0
-        assert overlap > 0
-        assert dense > 0
 
         self.samplerate = samplerate
-        self.framesize  = 2 << order
-        self.hopsize    = self.framesize // overlap
-        self.padsize    = (2 << (order + dense - 1)) - self.framesize
+        self.settings   = settings or Settings()
 
-        self.stft = STFT(self.framesize, hopsize=self.hopsize, padsize=self.padsize)
+        self.stft = STFT(framesize=self.settings.framesize,
+                         hopsize=self.settings.hopsize,
+                         padsize=self.settings.padsize)
 
     def __call__(self, x: ArrayLike,
                  kernel: Union[int, Tuple[int, int]],
@@ -42,7 +40,7 @@ class HPSS:
         each of the same shape as the input `x`.
 
         If the input is a time-domain array, then each output will be a time-domain array too.
-        If the input is a DFT matrix, then each output will be a DFT matrix,
+        If the input is a DFT matrix, then each output still will be a DFT matrix,
         containing the estimated magnitudes, but the original phase values.
 
         The `kernel` parameter controls the size of the spectral median filter.
@@ -121,9 +119,13 @@ class HPSS:
 
         if istft:
             
-            y1 = self.stft.istft(y1).resize(shape)
-            y2 = self.stft.istft(y2).resize(shape)
-            y3 = self.stft.istft(y3).resize(shape)
+            y1 = self.stft.istft(y1)
+            y2 = self.stft.istft(y2)
+            y3 = self.stft.istft(y3)
+
+            y1.resize(shape)
+            y2.resize(shape)
+            y3.resize(shape)
 
         assert y1.shape == shape
         assert y2.shape == shape

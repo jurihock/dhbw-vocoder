@@ -2,6 +2,7 @@ from pathlib import Path
 from numpy.typing import NDArray
 
 from subprocess import run
+from settings import Settings
 from hpss import HPSS
 from vocoder import Vocoder
 
@@ -41,6 +42,10 @@ def ptm(x: NDArray, vocoder: Vocoder) -> NDArray:
 
 if __name__ == '__main__':
 
+    # Customize STFT related settings:
+
+    settings = Settings(order=10, overlap=16, dense=1)
+
     # Specify input and output file paths:
 
     cwd = Path().cwd()
@@ -56,12 +61,12 @@ if __name__ == '__main__':
     # Preprocessing:
 
     # optionally try HPSS to extract and bypass the transients
-    # hpss = HPSS(samplerate, order=10, overlap=16, dense=1)
-    # harm, perc, misc = hpss(x[0], 42)
+    # hpss = HPSS(samplerate, settings)
+    # harm, perc, misc = hpss(x[0], 15)
 
     # Setup and customize the phase vocoder:
 
-    vocoder = Vocoder(samplerate, order=10, overlap=16, dense=1)
+    vocoder = Vocoder(samplerate, settings)
 
     # Uncomment one of the following procedures:
 

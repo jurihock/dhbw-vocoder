@@ -24,7 +24,7 @@ if __name__ == '__main__':
 
     # Analyze input `x`:
 
-    spectrum = Spectrum(samplerate, order=10, overlap=16, dense=1)
+    spectrum = Spectrum(samplerate)
     cepstrum = Cepstrum(samplerate)
 
     X = spectrum.analyze(x)

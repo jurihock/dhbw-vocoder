@@ -1,10 +1,11 @@
-from typing import Tuple
+from typing import Tuple, Union
 from numpy.typing import ArrayLike, NDArray
 
 import matplotlib.pyplot as plot
 import numpy as np
 
 from stft import STFT
+from settings import Settings
 
 
 class Spectrum:
@@ -13,24 +14,21 @@ class Spectrum:
     in addition to `analyze` (stft) and `synthesize` (istft) procedures.
     """
 
-    def __init__(self, samplerate: int, *, order: int = 10, overlap: int = 16, dense: int = 1):
+    def __init__(self, samplerate: int, settings: Union[Settings, None] = None):
         """
-        Creates a new spectrum processor instance for the specified `samplerate` in hertz,
-        FFT vector size `1 << order`, and STFT hop size `(2 << order) // overlap`.
-        Parameter `dense` increases the FFT bin density by zero-padding in the time domain.
+        Creates a new spectrum processor instance
+        for the specified `samplerate` in hertz
+        and customized STFT `settings`.
         """
 
         assert samplerate > 0
-        assert order > 0
-        assert overlap > 0
-        assert dense > 0
 
         self.samplerate = samplerate
-        self.framesize  = 2 << order
-        self.hopsize    = self.framesize // overlap
-        self.padsize    = (2 << (order + dense - 1)) - self.framesize
+        self.settings   = settings or Settings()
 
-        self.stft = STFT(self.framesize, hopsize=self.hopsize, padsize=self.padsize)
+        self.stft = STFT(framesize=self.settings.framesize,
+                         hopsize=self.settings.hopsize,
+                         padsize=self.settings.padsize)
 
     def freqs(self) -> NDArray:
         """
@@ -82,8 +80,8 @@ class Spectrum:
             assert X.ndim == 2
 
         samplerate = self.samplerate
-        framesize  = self.framesize
-        hopsize    = self.hopsize
+        framesize  = self.settings.framesize
+        hopsize    = self.settings.hopsize
 
         epsilon = np.finfo(X.dtype).eps
 
@@ -137,8 +135,8 @@ class Spectrum:
             assert X.ndim == 2
 
         samplerate = self.samplerate
-        framesize  = self.framesize
-        hopsize    = self.hopsize
+        framesize  = self.settings.framesize
+        hopsize    = self.settings.hopsize
 
         epsilon = np.finfo(X.dtype).eps
 
@@ -199,8 +197,8 @@ class Spectrum:
             assert X.ndim == 2
 
         samplerate = self.samplerate
-        framesize  = self.framesize
-        hopsize    = self.hopsize
+        framesize  = self.settings.framesize
+        hopsize    = self.settings.hopsize
 
         values = np.angle(X)
 
