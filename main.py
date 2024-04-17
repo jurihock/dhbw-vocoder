@@ -62,7 +62,7 @@ if __name__ == '__main__':
 
     # optionally try HPSS to extract and bypass the transients
     # hpss = HPSS(samplerate, settings)
-    # harm, perc, misc = hpss(x[0], 15)
+    # harm, perc, noise = hpss(x[0], 15)
 
     # Setup and customize the phase vocoder:
 

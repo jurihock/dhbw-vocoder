@@ -36,7 +36,7 @@ class HPSS:
         Performs the harmonic percussive source separation on `x`,
         which can be a time-domain array or a frequency-domain DFT matrix.
 
-        Returns a tuple of (harmonic, percussive, residual) estimates,
+        Returns a tuple of (harmonic, percussive, noise) estimates,
         each of the same shape as the input `x`.
 
         If the input is a time-domain array, then each output will be a time-domain array too.
@@ -50,8 +50,8 @@ class HPSS:
         the first element will be used for the harmonic mask and
         the second one for the percussive mask.
 
-        The `threshold` value can be either a "hard" or "soft" string keyword
-        or a scalar value, e.g. 1.
+        The `threshold` value can be a scalar or one of the following string keywords:
+        "hard", "soft", "fuzzy", "proto".
         """
 
         shape = np.shape(x)
@@ -81,31 +81,67 @@ class HPSS:
         kernel1 = np.ravel(kernel)[0]
         kernel2 = np.ravel(kernel)[-1]
 
-        # apply horizontal median filter
         median1 = medfilt2d(abs, (kernel1, 1))
-
-        # apply vertical median filter
         median2 = medfilt2d(abs, (1, kernel2))
 
+        median1 = np.square(median1)
+        median2 = np.square(median2)
+
         if str(threshold).lower() == 'hard':
+
+            # Harmonic/Percussive Separation Using Median Filtering (FitzGerald)
+            # http://dafx10.iem.at/papers/DerryFitzGerald_DAFx10_P15.pdf
 
             mask1 = (median1 >= median2).astype(float)
             mask2 = (median2 >= median1).astype(float)
 
         elif str(threshold).lower() == 'soft':
 
-            median1 = np.square(median1)
-            median2 = np.square(median2)
+            # Harmonic/Percussive Separation Using Median Filtering (FitzGerald)
+            # http://dafx10.iem.at/papers/DerryFitzGerald_DAFx10_P15.pdf
 
-            mask1 = median1 / (median1 + median2 + epsilon)
-            mask2 = median2 / (median1 + median2 + epsilon)
+            temp1 = median1 / (median1 + median2 + epsilon)
+            temp2 = median2 / (median1 + median2 + epsilon)
+
+            mask1 = temp1
+            mask2 = temp2
+        
+        elif str(threshold).lower() == 'fuzzy':
+
+            # Enhanced Fuzzy Decomposition of Sound Into Sines, Transients and Noise (Fierro)
+            # https://arxiv.org/pdf/2210.14041.pdf
+
+            temp1 = median1 / (median1 + median2 + epsilon)
+            temp2 = median2 / (median1 + median2 + epsilon)
+            temp3 = 1 - np.sqrt(np.abs(temp1 - temp2))
+
+            mask1 = temp1 - 0.5 * temp3
+            mask2 = temp2 - 0.5 * temp3
+
+        elif str(threshold).lower() == 'proto':
+
+            # Enhanced Fuzzy Decomposition of Sound Into Sines, Transients and Noise (Fierro)
+            # https://arxiv.org/pdf/2210.14041.pdf
+
+            temp0 = median1 / (median1 + median2 + epsilon)
+            temp1 = np.square(np.sin(temp0 * np.pi + np.pi))
+            temp2 = np.square(np.sin(temp0 * np.pi - np.pi))
+
+            mask1 = temp1 * (temp0 >= 0.5)
+            mask2 = temp2 * (temp0 <= 0.5)
 
         else:
 
+            # Extending harmonic-percussive separation of audio signals (Driedger)
+            # https://archives.ismir.net/ismir2014/paper/000127.pdf
+
             threshold = float(threshold)
 
-            mask1 = (median1 / (median2 + epsilon)) >  threshold
-            mask2 = (median2 / (median1 + epsilon)) >= threshold
+            temp1 = median1 / (median1 + median2 + epsilon)
+            temp2 = median2 / (median1 + median2 + epsilon)
+
+            mask1 = (temp1 / (temp2 + epsilon)) > threshold
+            mask2 = (temp2 / (temp1 + epsilon)) > threshold
 
         mask3 = 1 - (mask1 + mask2)
 
